@@ -42,13 +42,63 @@ as work lands; each entry links the commit/PR that closed it once merged.
 - Not yet deployed to Vercel (needs the user's Vercel account/CLI login).
 
 ## Slice 2 — Database that can't produce a wrong bill
-**Status: not started. Blocked on Supabase project credentials.**
-Needs a Supabase project URL + anon key (and, for the numbering
-bootstrap step, project owner access) before `supabase/schema.sql`,
-the `create_invoice`/`create_dc` RPCs, RLS policies, and
-`scripts/test-rls.mjs` / `scripts/test-numbering.mjs` can be written
-*and actually run* against a real instance — these are exit criteria,
-not aspirational, so they need something real to run against.
+**Status: done and verified against the live Supabase project.**
+
+Applied, via a direct Postgres connection, in order: `schema.sql` →
+`functions.sql` → `policies.sql`. Both exit-criteria scripts pass
+against the real project (not the SQL editor, which bypasses RLS and
+would prove nothing):
+
+```
+npm run test:rls          → All RLS checks passed.
+npm run test:numbering    → All numbering checks passed.
+```
+
+**Two real bugs found and fixed during this first live run** — both
+the same class of mistake, both in `create_invoice`/`create_dc`:
+`returns table (invoice_no int, id uuid, ...)` implicitly declares
+`id` as a PL/pgSQL variable in scope for the whole function body, so
+a bare `where id = ...` inside the function is genuinely ambiguous
+between that variable and a table's `id` column — Postgres rejected
+it at runtime with "column reference 'id' is ambiguous." Fixed by
+qualifying (`delivery_challans.id`, `settings.id`). This is exactly
+why the plan called for testing against a live database instead of
+trusting reviewed-but-unexecuted SQL.
+
+**Also fixed:** `scripts/test-numbering.mjs` originally opened 60
+concurrent `signInWithPassword` sessions to get 60 distinct clients —
+Supabase's auth rate limit rejected that burst (and it triggered a
+Node/Windows libuv crash under the connection burst). Changed to sign
+in once and share that session's access token across 60 separate
+client instances instead; still genuinely concurrent at the HTTP/RPC
+level, without hammering the auth endpoint.
+
+**Verified live, beyond the two exit-criteria scripts:**
+- `create_dc`, `cancel_invoice`, `cancel_dc` all work correctly.
+- An invoice can reference a DC via `dc_id`; `cancel_dc` on a billed
+  DC is correctly blocked ("DC 151 is billed on invoice 192. Cancel
+  that invoice first."), and succeeds once that invoice is cancelled.
+- `cancel_invoice` is idempotent (a second call is a no-op, not an
+  error).
+- The IGST hard-block fires correctly for an out-of-state customer
+  GSTIN, with zero invoice numbers burned by the rejection.
+- 60 concurrent `create_invoice` calls (30 valid / 30 deliberately
+  invalid) → exactly 30 succeed, the sequence advances by exactly 30,
+  zero orphaned headers, zero unexplained gaps in `invoice_register`.
+
+All test data generated during verification was wiped and both
+sequences reset to 101/151 (`scripts/reset-test-data.mjs`) — the
+project is in the same state as before any test ran, so the shop's
+real first invoice will be #101 and first DC will be #151.
+
+**⚠️ Flagging, not blocking:** the one shared login you created uses
+a 4-digit numeric password — almost certainly rejected by Supabase's
+"leaked password protection" if that's turned on, and easy to guess.
+This becomes the *permanent* day-to-day login for a system holding
+real customer GSTINs and tax documents. Strongly recommend changing
+it (Authentication → Users → the user → reset password) before
+Slice 3 puts this in front of a real customer bill — I did not
+change it myself since it's your credential to manage.
 
 ## Slice 3 — Invoice end to end
 **Status: not started.** Depends on Slice 2.
