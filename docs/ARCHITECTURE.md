@@ -80,25 +80,52 @@ src/
                           also the Settings-editor fallback (Slice 6).
   documents/              The one document engine (see above).
     types.ts              PrintableDocument / DocConfig shapes.
-    configs.ts            INVOICE_CONFIG, DC_CONFIG — the only place
-                           invoice/DC differences are declared.
+    configs.ts            INVOICE_CONFIG, DC_CONFIG — print-side config.
+    formConfigs.ts         INVOICE_FORM_CONFIG, DC_FORM_CONFIG — the
+                           form's equivalent (which RPC, whether rate
+                           columns show, purpose options).
+    DocumentForm.tsx        The one form engine (Slice 3), config-driven
+                            same way PrintShell is. Handles customer/
+                            item autocomplete, draft autosave, the
+                            "Last bill issued" fact (never a promised
+                            number), and calling the right RPC.
     PrintShell.tsx         Shared bordered-frame print layout.
+    PrintPageChrome.tsx     Shared no-print toolbar (Back/Print) used
+                            by both the fixture harness and the real
+                            print page.
     InvoiceTotals.tsx      Footer for kind="invoice" (words + GST box).
     DCNote.tsx             Footer for kind="dc" (no-tax note).
     CancelledWatermark.tsx Overlay, wired up in Slice 5.
   fixtures/               Committed print-regression fixtures (JSON).
                            See docs/PRINT.md.
-  lib/money.ts            Display-only formatting. No words function —
-                           see above.
-  pages/                  Route-level components.
+  hooks/useAutocomplete.ts Debounced, server-side, capped customer/item
+                           search — see docs/DECISIONS.md.
+  lib/
+    money.ts              Display-only formatting. No words function
+                           — see docs/PRINT.md.
+    supabase.ts            The Supabase client. Fails loudly at import
+                            if env vars are missing.
+    AuthProvider.tsx        Session context — one shared login, no
+                            roles, on purpose.
+    ProtectedRoute.tsx      Redirects to /login if there's no session.
+    draft.ts                localStorage autosave helpers.
+    validation.ts           GSTIN format + Tamil Nadu state-code check
+                            (client-side mirror of the DB's hard block).
+  pages/                  Route-level components (LoginPage, HomePage,
+                          NewInvoicePage, NewDCPage, PrintFixturePage,
+                          PrintDocumentPage).
   router.tsx              All app routes.
 scripts/
   gen-fixtures.mjs        Regenerates src/fixtures/*.json. Not shipped.
   verify-print.mjs        Automated print regression check (console
                            errors, network isolation, page count).
-  test-rls.mjs            Slice 2: RLS/auth checks through the anon key.
-  test-numbering.mjs      Slice 2: concurrency + partial-write checks.
-supabase/                 Slice 2: schema, RPCs, policies (not yet present).
+  test-rls.mjs            RLS/auth checks through the anon key.
+  test-numbering.mjs      Concurrency + partial-write checks.
+  apply-schema.mjs        Applies supabase/*.sql via a direct DB
+                           connection. Ops tool, not shipped.
+  reset-test-data.mjs     Wipes business data, resets sequences to
+                          101/151. Ops tool, not shipped.
+supabase/                 Schema, RPCs, RLS policies. See supabase/README.md.
 reference/                The original prototype, plan, and schema —
                            kept for citation, not imported by the app.
 ```

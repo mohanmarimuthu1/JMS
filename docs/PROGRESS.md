@@ -100,11 +100,57 @@ it (Authentication → Users → the user → reset password) before
 Slice 3 puts this in front of a real customer bill — I did not
 change it myself since it's your credential to manage.
 
-## Slice 3 — Invoice end to end
-**Status: not started.** Depends on Slice 2.
+## Slice 3 — Invoice end to end, and Slice 4 — DC by configuration
+**Status: done and verified live, both together.** Building `PrintShell`
+and configs generically from Slice 1 onward meant DC needed zero new
+form or print components once the invoice form worked — `DocumentForm`
++ `DC_FORM_CONFIG` and `PrintShell` + `DC_CONFIG` (already built in
+Slice 1) were the entire DC implementation. Slice 4's structural exit
+criterion ("the diff adds no new component, only config") held without
+having to enforce it separately.
 
-## Slice 4 — DC by configuration only
-**Status: not started.** Depends on Slice 3.
+Also added, since without it nobody could reach any of this: a login
+screen (`src/pages/LoginPage.tsx`), session handling
+(`src/lib/AuthProvider.tsx`), and route protection
+(`src/lib/ProtectedRoute.tsx`) — the original slice breakdown counted
+this as part of Slice 2's scope but the UI for it hadn't been built
+yet.
+
+**Verified live, end to end, via Playwright against the real
+project** (screenshots taken, not just "it compiled"):
+- Full flow: log in → new invoice → autocomplete/fill → Save & Print
+  → lands on `/print/invoice/101`. Every number, date, and money field
+  on the rendered page checked by hand: dates `DD-MM-YYYY`, GST split
+  correct, `750 + 67.50 + 67.50 = 885.00`, words "Rupees Eight Hundred
+  Eighty Five Only" matching the total exactly.
+- Same for a DC: `/print/dc/151`, 4-column table, no tax, correct
+  "GST not charged" note, receiver + authorised signatory columns.
+- **The duplicate-customer-by-typing bug is confirmed fixed live**,
+  not just by code review: created two invoices by typing the exact
+  same customer name both times (never touching the autocomplete
+  dropdown) — the database has exactly one customer row, and both
+  invoices reference it.
+- Draft autosave: typed a customer name and a line description,
+  waited past the 400ms debounce, reloaded the page — both fields
+  were restored from `localStorage`.
+- Mobile layout (375px viewport, iPhone SE-sized): line items render
+  as stacked cards with 44px-minimum touch targets, not the
+  prototype's unusable 7-column table.
+- Found and fixed a real bug during this first live run: successful
+  login never navigated anywhere — nothing in `LoginPage` reacted to
+  the session becoming truthy. Fixed by navigating explicitly on
+  success and redirecting away from `/login` if already signed in.
+
+All test data wiped afterward via `scripts/reset-test-data.mjs`; the
+project is back to zero rows with sequences at 101/151.
+
+**Deliberately out of scope for this pass** (noted so it's a decision,
+not a gap discovered later): the invoice form doesn't yet expose a
+"bill against this DC" picker — `dc_id` is wired through the RPC and
+the schema, but there's no UI to select an existing delivery challan
+when creating an invoice. Also not built yet: History (Slice 5), and
+the customer/item/settings editors (Slice 6, deliberately deferred —
+the form already learns both on save).
 
 ## Slice 5 — History, cancel, hand-off
 **Status: not started.** Depends on Slices 3–4.

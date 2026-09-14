@@ -60,7 +60,27 @@ not just reviewed on paper.
 **Flagging for you:** the shared login's password is a weak 4-digit
 number — for what's now the permanent daily login on a system holding
 real customer tax data. Change it (Authentication → Users → reset
-password) before Slice 3 puts this in front of a real customer.
+password) before this goes in front of a real customer.
+
+### Slices 3 + 4 — Invoice form, and DC "for free" ✅ verified live
+Turned out to be one piece of work, not two — see `docs/PROGRESS.md`
+for why. Also added a login screen and session handling, which the
+app couldn't function without and hadn't been built yet.
+
+Verified with an actual Playwright run against the live project, with
+screenshots at each step, not just a passing build:
+- Logged in, created a real invoice, landed on its print page — every
+  number checked by hand (dates, GST split, the total, the words
+  matching the total exactly).
+- Same for a delivery challan.
+- Confirmed live that typing the same customer name twice (without
+  using the autocomplete) creates exactly one customer row, not two —
+  this was the prototype's most likely real-world data bug.
+- Confirmed a draft survives a page reload.
+- Confirmed the mobile layout (checked at a 375px-wide viewport) is
+  actually usable — stacked cards, not a 7-column table.
+- Found one real bug live: login succeeded but nothing navigated
+  anywhere afterward. Fixed.
 
 ---
 
@@ -68,8 +88,6 @@ password) before Slice 3 puts this in front of a real customer.
 
 | Slice | What it covers | Status |
 |---|---|---|
-| 3 | Invoice form end to end, on a phone | Not started |
-| 4 | Delivery challan (by config, not new code) | Not started |
 | 5 | History list, cancel/void, backups | Not started |
 | 6 | Customer/item/settings editors *(optional)* | Not started, deliberately deferred |
 
@@ -79,7 +97,8 @@ Full detail and exit criteria for each in `docs/PROGRESS.md`.
 
 ## Right now
 
-Slice 2 is done and merged. Starting Slice 3 (the invoice form) next.
+Slices 1-4 are done and verified live. Slice 5 (History, cancel/void,
+backups) is next.
 
 ---
 
