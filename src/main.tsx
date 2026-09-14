@@ -18,9 +18,12 @@ import "@fontsource/space-grotesk/700.css";
 
 import "./index.css";
 import { router } from "./router";
+import { AuthProvider } from "./lib/AuthProvider";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </React.StrictMode>,
 );
