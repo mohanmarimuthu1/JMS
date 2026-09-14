@@ -155,6 +155,55 @@ the form already learns both on save).
 ## Slice 5 — History, cancel, hand-off
 **Status: not started.** Depends on Slices 3–4.
 
+## Slice 5 — History, cancel, hand-off
+**Status: done and verified live.**
+
+- `src/pages/HistoryPage.tsx` queries the `documents` view server-side
+  — search by customer name or document number, filter by type,
+  `order by date desc, doc_no desc`, capped at 100 rows. The prototype
+  did all of this in JS over the full in-memory array and sorted on
+  the `date` string alone, so same-day documents had no deterministic
+  order.
+- Cancel with a required typed reason (`cancel_invoice`/`cancel_dc`,
+  built in Slice 2). Cancelled documents stay in the list — struck
+  through, tagged CANCELLED, still reachable via "View" — never
+  hidden, so the operator can't mistake a cancelled number for a gap.
+- The `CancelledWatermark` component built in Slice 1 (before there
+  was even a cancel feature to use it) is now wired up: a diagonal
+  CANCELLED stamp plus a footer line with the date and reason.
+- **Verified live**: created an invoice, found it in History by
+  searching the customer's name, cancelled it with a reason, confirmed
+  it stays visible struck-through, and confirmed the print page shows
+  the watermark and reason. **Found and fixed a real bug in this same
+  run**: the cancellation footer rendered a garbled string
+  ("14T13:25:48.688282+00:00-09-2026") instead of a date —
+  `formatDateDDMMYYYY` assumed a plain `YYYY-MM-DD` string but
+  `cancelled_at` is a full timestamptz, and a bare `.split("-")` broke
+  on the "-" inside the timezone offset. Fixed in `src/lib/money.ts`.
+- One-click CSV export of all invoices (`src/lib/export.ts`, a button
+  on the History page) — GSTIN, subtotal, tax breakdown, status,
+  cancellation reason, one row per invoice. A convenience for the
+  accountant at filing time, not a substitute for real backups.
+- PWA icons generated from the shop's actual logo artwork
+  (`public/icon-192.png`, `public/icon-512.png`) and wired into the
+  manifest and `index.html` — "add to home screen" now shows the real
+  logo, not a blank icon.
+- `docs/HOW-TO-MAKE-A-BILL.md` — the one-page operator instructions,
+  written for your father: making an invoice, making a DC, finding an
+  old bill, and — the one that matters most — what to do if a mistake
+  is made (cancel with a reason, never expect a delete button) and
+  what to do if the connection drops mid-bill.
+
+**Still needs a human, not code:** confirming Supabase's scheduled
+backups are actually turned on (dashboard-only setting, documented in
+`supabase/README.md`), and sitting with your father to walk through
+`docs/HOW-TO-MAKE-A-BILL.md` for real.
+
+**Deliberately out of scope:** an invoice-to-DC picker in the form
+(same note as Slice 3/4) — `dc_id` is wired through the schema and
+RPC, but there is no UI yet to select an existing DC when billing
+against it.
+
 ## Slice 6 — Master-data + settings editors (optional)
 **Status: not started.** Deliberately deferred — see
 `docs/DECISIONS.md`.

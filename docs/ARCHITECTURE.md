@@ -111,9 +111,13 @@ src/
     draft.ts                localStorage autosave helpers.
     validation.ts           GSTIN format + Tamil Nadu state-code check
                             (client-side mirror of the DB's hard block).
+    history.ts              Server-side search/filter against the
+                            `documents` view, plus cancel_invoice/
+                            cancel_dc wrappers.
+    export.ts               One-click CSV export of all invoices.
   pages/                  Route-level components (LoginPage, HomePage,
-                          NewInvoicePage, NewDCPage, PrintFixturePage,
-                          PrintDocumentPage).
+                          NewInvoicePage, NewDCPage, HistoryPage,
+                          PrintFixturePage, PrintDocumentPage).
   router.tsx              All app routes.
 scripts/
   gen-fixtures.mjs        Regenerates src/fixtures/*.json. Not shipped.

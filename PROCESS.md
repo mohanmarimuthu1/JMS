@@ -88,7 +88,6 @@ screenshots at each step, not just a passing build:
 
 | Slice | What it covers | Status |
 |---|---|---|
-| 5 | History list, cancel/void, backups | Not started |
 | 6 | Customer/item/settings editors *(optional)* | Not started, deliberately deferred |
 
 Full detail and exit criteria for each in `docs/PROGRESS.md`.
@@ -97,8 +96,26 @@ Full detail and exit criteria for each in `docs/PROGRESS.md`.
 
 ## Right now
 
-Slices 1-4 are done and verified live. Slice 5 (History, cancel/void,
-backups) is next.
+Slices 1-5 are done and verified live. Only Slice 6 (customer/item/
+settings editors) is left, and it's deliberately optional — build it
+when a typo actually needs fixing, not before.
+
+The app is now genuinely usable end to end: sign in, make an invoice
+or DC, find and reprint or cancel an old one, export a CSV. What's
+left is two human steps, not code: confirming Supabase backups are on
+(`supabase/README.md`), and walking your father through
+`docs/HOW-TO-MAKE-A-BILL.md` for real.
+
+### Slice 5 — History, cancel, hand-off ✅ verified live
+- History search/filter hits the database, not an in-memory array.
+- Cancelled documents with a reason: found live, cancelled with a
+  reason, confirmed the print page shows a CANCELLED watermark. Found
+  and fixed one real bug in the process: the cancellation footer
+  showed a garbled string instead of a date (a formatting function
+  assumed the wrong timestamp shape) — fixed.
+- One-click CSV export of all invoices for your accountant.
+- Real PWA icons from the shop's actual logo (not a placeholder).
+- The one-page operator instructions your father actually needs.
 
 ---
 

@@ -46,6 +46,13 @@ they live in the dashboard, not in a file you can review:
   environment variable. Only the `anon` `public` key belongs in
   `.env.local` / Vercel env vars — a `service_role` key in a Vite
   bundle bypasses every policy in `policies.sql`.
+- **Database → Backups:** confirm scheduled backups are enabled (not
+  something this repo's code can check or enforce — it's a project
+  plan setting). This is the actual disaster-recovery story for a
+  legal ledger; the app's own `npm run db:reset-test-data` is a dev
+  tool, not a backup, and the History page's "Export CSV" button
+  (Slice 5) is a convenience for your accountant, not a substitute
+  for real backups either.
 
 ## 3. Environment variables
 
