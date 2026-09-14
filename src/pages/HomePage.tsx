@@ -1,38 +1,43 @@
 import { Link } from "react-router-dom";
+import { FileText, Truck, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/AuthProvider";
 
 /**
- * Placeholder landing page for Slice 1. The real app shell (tabs for
- * New Invoice / DC / History / Customers / Items / Settings) lands in
- * Slices 3-6. This page exists only so Slice 1's print-fidelity work
- * has an entry point to test from, on both desktop and the shop phone.
+ * App shell for Slice 3. History/Customers/Items/Settings tabs land
+ * in Slices 5/6 — this is deliberately just the two things a real
+ * bill requires today: make an invoice, make a DC.
  */
 export function HomePage() {
+  const { signOut } = useAuth();
+
   return (
-    <div className="min-h-screen bg-paper p-8 mono text-ink">
-      <h1 className="text-2xl font-bold headline mb-2">JMS Engineering — Billing</h1>
-      <p className="text-sm text-muted mb-6">
-        Slice 1: print engine under construction. Use the fixtures below to
-        test print fidelity against the shop's physical bill book.
-      </p>
-      <div className="flex flex-col gap-2 max-w-xs">
+    <div className="min-h-screen bg-paper mono text-ink">
+      <header className="bg-ink text-white px-4 py-3 flex items-center justify-between">
+        <h1 className="font-bold headline">JMS Engineering</h1>
+        <button onClick={signOut} className="flex items-center gap-1.5 text-sm opacity-90 hover:opacity-100">
+          <LogOut size={15} /> Sign out
+        </button>
+      </header>
+
+      <div className="p-4 max-w-3xl mx-auto grid sm:grid-cols-2 gap-4">
         <Link
-          to="/print/fixture/invoice-min"
-          className="px-4 py-2 bg-white border border-ink rounded-sm text-center"
+          to="/new/invoice"
+          className="bg-white border border-rule rounded-sm p-6 flex flex-col items-center gap-2 hover:border-rust min-h-[120px] justify-center"
         >
-          Invoice fixture — minimal (1 line)
+          <FileText size={28} />
+          <span className="font-semibold">New Invoice</span>
         </Link>
         <Link
-          to="/print/fixture/invoice-max"
-          className="px-4 py-2 bg-white border border-ink rounded-sm text-center"
+          to="/new/dc"
+          className="bg-white border border-rule rounded-sm p-6 flex flex-col items-center gap-2 hover:border-rust min-h-[120px] justify-center"
         >
-          Invoice fixture — max (18 lines, page break)
+          <Truck size={28} />
+          <span className="font-semibold">New Delivery Challan</span>
         </Link>
-        <Link
-          to="/print/fixture/dc-max"
-          className="px-4 py-2 bg-white border border-ink rounded-sm text-center"
-        >
-          Delivery challan fixture
-        </Link>
+      </div>
+
+      <div className="p-4 max-w-3xl mx-auto text-xs text-muted">
+        History, customer/item lists, and settings editors land in later slices — see PROCESS.md.
       </div>
     </div>
   );
