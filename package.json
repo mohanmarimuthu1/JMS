@@ -8,8 +8,10 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "test:rls": "node scripts/test-rls.mjs",
-    "test:numbering": "node scripts/test-numbering.mjs"
+    "db:apply": "node scripts/apply-schema.mjs",
+    "db:reset-test-data": "node scripts/reset-test-data.mjs",
+    "test:rls": "node --env-file=.env.local scripts/test-rls.mjs",
+    "test:numbering": "node --env-file=.env.local scripts/test-numbering.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.1.0",
@@ -26,17 +28,18 @@
     "@types/node": "^26.5.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.3",
+    "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.14.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^17.12.0",
+    "pg": "^8.23.0",
     "playwright": "^1.63.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.70.0",
-    "vite": "^8.3.0"
+    "vite": "^7.3.6"
   }
 }
