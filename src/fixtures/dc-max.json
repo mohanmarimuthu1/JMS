@@ -1,0 +1,70 @@
+{
+  "kind": "dc",
+  "docNo": 187,
+  "date": "2026-09-10",
+  "customer": {
+    "name": "Kaveri Precision Components Pvt Ltd",
+    "address": "Plot 14, SIDCO Industrial Estate, Coimbatore - 641021",
+    "gstin": "33AAFCK1234L1ZP"
+  },
+  "seller": {
+    "name": "JMS ENGINEERING",
+    "addressLine": "1/2, 39-B-16, Aringar Anna Colony, SIDCO Industrial Estate, Coimbatore - 641 021.",
+    "cell": "8610026754, 7708881444",
+    "gstin": "33BBJPJ1166M1ZJ",
+    "stateCode": "33",
+    "gstSplitPct": 9,
+    "jurisdiction": "Coimbatore"
+  },
+  "refNo": "PO-4471",
+  "purpose": "Job work",
+  "purposeNote": null,
+  "status": "issued",
+  "lines": [
+    {
+      "description": "Raw forged blank for turning, EN8 grade, batch #2000",
+      "hsn": "7326",
+      "qty": 30
+    },
+    {
+      "description": "Raw forged blank for turning, EN8 grade, batch #2001",
+      "hsn": "7326",
+      "qty": 31
+    },
+    {
+      "description": "Raw forged blank for turning, EN8 grade, batch #2002",
+      "hsn": "7326",
+      "qty": 32
+    },
+    {
+      "description": "Raw forged blank for turning, EN8 grade, batch #2003",
+      "hsn": "7326",
+      "qty": 33
+    },
+    {
+      "description": "Raw forged blank for turning, EN8 grade, batch #2004",
+      "hsn": "7326",
+      "qty": 34
+    },
+    {
+      "description": "Raw forged blank for turning, EN8 grade, batch #2005",
+      "hsn": "7326",
+      "qty": 35
+    },
+    {
+      "description": "Raw forged blank for turning, EN8 grade, batch #2006",
+      "hsn": "7326",
+      "qty": 36
+    },
+    {
+      "description": "Raw forged blank for turning, EN8 grade, batch #2007",
+      "hsn": "7326",
+      "qty": 37
+    },
+    {
+      "description": "Raw forged blank for turning, EN8 grade, batch #2008",
+      "hsn": "7326",
+      "qty": 38
+    }
+  ]
+}

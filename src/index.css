@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Global styles that must survive print.
+ *
+ * The prototype defined `.mono` / `.headline` and the Google Fonts
+ * @import inside a <style> tag rendered by the App shell component.
+ * Print replaced the whole app with <PrintView/>, which unmounted that
+ * shell — so `.mono` was undefined at print time and every invoice
+ * silently printed in the browser's default font. Fonts are imported
+ * in main.tsx (always loaded) and the two utility classes below live in
+ * this global stylesheet (always loaded), so print can never lose them.
+ * See docs/PRINT.md.
+ */
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+}
+.headline {
+  font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+}
+
+.tab-shape {
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+}
+
+/*
+ * Print setup — see docs/PRINT.md for the full rationale. The prototype
+ * had no @page rule at all and relied on Chrome's shrink-to-fit; this
+ * pins an actual A4 page so output is deterministic across browsers
+ * and devices.
+ */
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    margin: 0;
+    background: white;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tr,
+  .doc-footer,
+  .doc-header {
+    break-inside: avoid;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

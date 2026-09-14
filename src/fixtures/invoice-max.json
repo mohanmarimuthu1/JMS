@@ -1,0 +1,160 @@
+{
+  "kind": "invoice",
+  "docNo": 214,
+  "date": "2026-09-14",
+  "customer": {
+    "name": "Kaveri Precision Components Pvt Ltd",
+    "address": "Plot 14, SIDCO Industrial Estate, Coimbatore - 641021",
+    "gstin": null
+  },
+  "seller": {
+    "name": "JMS ENGINEERING",
+    "addressLine": "1/2, 39-B-16, Aringar Anna Colony, SIDCO Industrial Estate, Coimbatore - 641 021.",
+    "cell": "8610026754, 7708881444",
+    "gstin": "33BBJPJ1166M1ZJ",
+    "stateCode": "33",
+    "gstSplitPct": 9,
+    "jurisdiction": "Coimbatore"
+  },
+  "orderNo": "PO-4471",
+  "orderDate": "2026-09-01",
+  "dcNoManual": "187",
+  "dcDateManual": "2026-09-10",
+  "status": "issued",
+  "lines": [
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1000",
+      "hsn": "8466",
+      "qty": 24,
+      "rate": 1875.5,
+      "amount": 45012
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1001",
+      "hsn": "8466",
+      "qty": 25,
+      "rate": 1887.75,
+      "amount": 47193.75
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1002",
+      "hsn": "8466",
+      "qty": 26,
+      "rate": 1900,
+      "amount": 49400
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1003",
+      "hsn": "8466",
+      "qty": 27,
+      "rate": 1912.25,
+      "amount": 51630.75
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1004",
+      "hsn": "8466",
+      "qty": 28,
+      "rate": 1924.5,
+      "amount": 53886
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1005",
+      "hsn": "8466",
+      "qty": 29,
+      "rate": 1936.75,
+      "amount": 56165.75
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1006",
+      "hsn": "8466",
+      "qty": 30,
+      "rate": 1949,
+      "amount": 58470
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1007",
+      "hsn": "8466",
+      "qty": 31,
+      "rate": 1961.25,
+      "amount": 60798.75
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1008",
+      "hsn": "8466",
+      "qty": 32,
+      "rate": 1973.5,
+      "amount": 63152
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1009",
+      "hsn": "8466",
+      "qty": 33,
+      "rate": 1985.75,
+      "amount": 65529.75
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1010",
+      "hsn": "8466",
+      "qty": 34,
+      "rate": 1998,
+      "amount": 67932
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1011",
+      "hsn": "8466",
+      "qty": 35,
+      "rate": 2010.25,
+      "amount": 70358.75
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1012",
+      "hsn": "8466",
+      "qty": 36,
+      "rate": 2022.5,
+      "amount": 72810
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1013",
+      "hsn": "8466",
+      "qty": 37,
+      "rate": 2034.75,
+      "amount": 75285.75
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1014",
+      "hsn": "8466",
+      "qty": 38,
+      "rate": 2047,
+      "amount": 77786
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1015",
+      "hsn": "8466",
+      "qty": 39,
+      "rate": 2059.25,
+      "amount": 80310.75
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1016",
+      "hsn": "8466",
+      "qty": 40,
+      "rate": 2071.5,
+      "amount": 82860
+    },
+    {
+      "description": "CNC turned component, EN8 grade, OD 42mm x 118mm, precision ground to +/-0.02mm tolerance, phosphate coated — batch #1017",
+      "hsn": "8466",
+      "qty": 41,
+      "rate": 2083.75,
+      "amount": 85433.75
+    }
+  ],
+  "subtotal": 1164015.75,
+  "sgstPct": 9,
+  "sgst": 104761.42,
+  "cgstPct": 9,
+  "cgst": 104761.42,
+  "roundOff": 0.41,
+  "total": 1373539,
+  "amountInWords": "Rupees Thirteen Lakh Seventy Three Thousand Five Hundred Thirty Nine Only"
+}

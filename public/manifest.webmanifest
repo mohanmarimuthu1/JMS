@@ -1,0 +1,9 @@
+{
+  "name": "JMS Engineering Billing",
+  "short_name": "JMS Billing",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#DED7C0",
+  "theme_color": "#1F2A30",
+  "icons": []
+}
