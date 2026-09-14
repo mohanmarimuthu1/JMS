@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
-import { Printer, ArrowLeft } from "lucide-react";
 import { PrintShell } from "@/documents/PrintShell";
+import { PrintPageChrome } from "@/documents/PrintPageChrome";
 import { configFor } from "@/documents/configs";
 import type { PrintableDocument } from "@/documents/types";
 
@@ -38,25 +38,9 @@ export function PrintFixturePage() {
     );
   }
 
-  const config = configFor(doc.kind);
-
   return (
-    <div className="min-h-screen bg-paper py-6 print:bg-white print:py-0">
-      <div className="no-print mx-auto mb-4 flex justify-between px-4" style={{ width: "190mm" }}>
-        <Link
-          to="/"
-          className="flex items-center gap-1.5 text-sm px-3 py-2 border border-ink rounded-sm bg-white"
-        >
-          <ArrowLeft size={15} /> Back
-        </Link>
-        <button
-          onClick={() => window.print()}
-          className="flex items-center gap-1.5 text-sm px-4 py-2 bg-rust text-white rounded-sm"
-        >
-          <Printer size={15} /> Print / Save PDF
-        </button>
-      </div>
-      <PrintShell config={config} doc={doc} />
-    </div>
+    <PrintPageChrome>
+      <PrintShell config={configFor(doc.kind)} doc={doc} />
+    </PrintPageChrome>
   );
 }
