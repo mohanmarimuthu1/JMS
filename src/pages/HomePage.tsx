@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
-import { FileText, Truck, LogOut } from "lucide-react";
+import { FileText, Truck, Search, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/AuthProvider";
 
 /**
- * App shell for Slice 3. History/Customers/Items/Settings tabs land
- * in Slices 5/6 — this is deliberately just the two things a real
- * bill requires today: make an invoice, make a DC.
+ * App shell. Customer/item/settings editors land in Slice 6
+ * (deliberately deferred — the form already learns both on save).
  */
 export function HomePage() {
   const { signOut } = useAuth();
@@ -19,7 +18,7 @@ export function HomePage() {
         </button>
       </header>
 
-      <div className="p-4 max-w-3xl mx-auto grid sm:grid-cols-2 gap-4">
+      <div className="p-4 max-w-3xl mx-auto grid sm:grid-cols-3 gap-4">
         <Link
           to="/new/invoice"
           className="bg-white border border-rule rounded-sm p-6 flex flex-col items-center gap-2 hover:border-rust min-h-[120px] justify-center"
@@ -34,10 +33,17 @@ export function HomePage() {
           <Truck size={28} />
           <span className="font-semibold">New Delivery Challan</span>
         </Link>
+        <Link
+          to="/history"
+          className="bg-white border border-rule rounded-sm p-6 flex flex-col items-center gap-2 hover:border-rust min-h-[120px] justify-center"
+        >
+          <Search size={28} />
+          <span className="font-semibold">History</span>
+        </Link>
       </div>
 
       <div className="p-4 max-w-3xl mx-auto text-xs text-muted">
-        History, customer/item lists, and settings editors land in later slices — see PROCESS.md.
+        Customer/item lists and settings editors land in a later slice — see PROCESS.md.
       </div>
     </div>
   );

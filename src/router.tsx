@@ -3,6 +3,7 @@ import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NewInvoicePage } from "@/pages/NewInvoicePage";
 import { NewDCPage } from "@/pages/NewDCPage";
+import { HistoryPage } from "@/pages/HistoryPage";
 import { PrintFixturePage } from "@/pages/PrintFixturePage";
 import { PrintDocumentPage } from "@/pages/PrintDocumentPage";
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: "/", element: <HomePage /> },
       { path: "/new/invoice", element: <NewInvoicePage /> },
       { path: "/new/dc", element: <NewDCPage /> },
+      { path: "/history", element: <HistoryPage /> },
       { path: "/print/invoice/:no", element: <PrintDocumentPage kind="invoice" /> },
       { path: "/print/dc/:no", element: <PrintDocumentPage kind="dc" /> },
     ],

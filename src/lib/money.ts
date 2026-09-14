@@ -17,9 +17,16 @@ export function money(n: number | string | null | undefined): string {
   return num.toFixed(2);
 }
 
+/** Accepts either a plain date ("2026-09-14") or a full timestamptz
+ * ("2026-09-14T13:25:48.68+00:00") — only the date portion is ever
+ * rendered. A bare `.split("-")` on a full timestamp breaks on the
+ * timezone offset's own "-", which is how this shipped its first bug
+ * (docs/PROGRESS.md): a cancelled-invoice footer rendering
+ * "14T13:25:48.688282+00:00-09-2026" instead of a date. */
 export function formatDateDDMMYYYY(iso: string | null | undefined): string {
   if (!iso) return "—";
-  const [y, m, d] = iso.split("-");
-  if (!y || !m || !d) return iso;
+  const datePart = iso.slice(0, 10);
+  const [y, m, d] = datePart.split("-");
+  if (!y || !m || !d || y.length !== 4) return iso;
   return `${d}-${m}-${y}`;
 }
