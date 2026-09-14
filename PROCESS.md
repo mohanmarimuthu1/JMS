@@ -82,30 +82,6 @@ screenshots at each step, not just a passing build:
 - Found one real bug live: login succeeded but nothing navigated
   anywhere afterward. Fixed.
 
----
-
-## What's left
-
-| Slice | What it covers | Status |
-|---|---|---|
-| 6 | Customer/item/settings editors *(optional)* | Not started, deliberately deferred |
-
-Full detail and exit criteria for each in `docs/PROGRESS.md`.
-
----
-
-## Right now
-
-Slices 1-5 are done and verified live. Only Slice 6 (customer/item/
-settings editors) is left, and it's deliberately optional — build it
-when a typo actually needs fixing, not before.
-
-The app is now genuinely usable end to end: sign in, make an invoice
-or DC, find and reprint or cancel an old one, export a CSV. What's
-left is two human steps, not code: confirming Supabase backups are on
-(`supabase/README.md`), and walking your father through
-`docs/HOW-TO-MAKE-A-BILL.md` for real.
-
 ### Slice 5 — History, cancel, hand-off ✅ verified live
 - History search/filter hits the database, not an in-memory array.
 - Cancelled documents with a reason: found live, cancelled with a
@@ -116,6 +92,74 @@ left is two human steps, not code: confirming Supabase backups are on
 - One-click CSV export of all invoices for your accountant.
 - Real PWA icons from the shop's actual logo (not a placeholder).
 - The one-page operator instructions your father actually needs.
+
+---
+
+## What's left, and how to do it
+
+All the code-level slices (1-5) are done and verified live. What
+remains is a short list of **things only you can do** (a handful of
+minutes each, none of them code), plus features deliberately deferred
+because they're not needed yet.
+
+### Before this touches a real customer — do these
+
+1. **Change the shared login's password.** It's currently a weak
+   4-digit number, and it became the permanent daily login the moment
+   Slice 3 wired auth up.
+   **How:** Supabase dashboard → Authentication → Users → click the
+   user row → use the password-reset action there to set a new one.
+   Keep it somewhere durable (a password manager, or written down at
+   the shop) — it's the only login that will ever exist.
+
+2. **Deploy it somewhere your father can actually reach on his phone.**
+   Everything so far has only been run locally (`npm run dev` /
+   `preview`) and tested against `localhost` — there is no live URL
+   yet.
+   **How:**
+   - Easiest: go to vercel.com → "Add New Project" → import the
+     `mohanmarimuthu1/JMS` GitHub repo → in the project's environment
+     variables, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+     (same values as your local `.env.local`) → Deploy.
+   - Or via CLI: `npx vercel login`, then `npx vercel --prod` from
+     this folder (it'll ask for the same two env vars).
+   - **Afterward**, add the resulting `https://...vercel.app` URL to
+     Supabase → Authentication → URL Configuration → Site URL and the
+     redirect allowlist (this was left as a placeholder in
+     `supabase/README.md` because there was no URL yet).
+
+3. **Print an invoice and a DC on the shop's actual printer** and hold
+   them next to a real page from the paper bill book. This is the one
+   check nothing remote can do — see the golden-sample checklist in
+   `docs/PRINT.md`.
+
+4. **Confirm Supabase's scheduled backups are switched on.**
+   **How:** Supabase dashboard → Database → Backups. This is a
+   project-plan setting, not something this repo's code can check or
+   turn on for you.
+
+5. **Sit with your father and walk through `docs/HOW-TO-MAKE-A-BILL.md`**
+   using a real (or test) bill, on whichever device he'll actually use
+   day to day. Print that page and leave it by the computer.
+
+### Deferred on purpose — not blocking, build later if actually needed
+
+| Item | What it is | When to build it |
+|---|---|---|
+| Slice 6: customer/item/settings editors | Dedicated list/edit screens for customers, items, and the business profile | The form already learns customers and items automatically when you bill them — build a real editor only once a typo or duplicate actually needs fixing by hand, not before |
+| Invoice-to-DC picker | Letting the invoice form select an *existing* delivery challan to bill against, instead of leaving it unlinked | `dc_id` already exists end-to-end in the schema and the `create_invoice` RPC — only the picker UI is missing. Build it when you're actually issuing invoices against DCs day to day |
+| IGST / out-of-state billing | Full inter-state tax support | Only if you actually get an out-of-state customer — right now the app hard-blocks that case with a clear error rather than silently issuing a wrong bill, which was the deliberate design choice (`docs/DECISIONS.md`) |
+
+### Minor, non-urgent technical note
+
+The production JS bundle is ~500KB (mostly the Supabase client
+library), which triggered a build-time size warning. Not a problem at
+this app's scale (one or two devices, not a public storefront), so it
+wasn't worth spending time on — flagging only so it's a recorded,
+deliberate non-issue rather than something noticed later and mistaken
+for a regression.
+
+Full slice-by-slice detail in `docs/PROGRESS.md`.
 
 ---
 
