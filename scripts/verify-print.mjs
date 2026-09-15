@@ -9,7 +9,7 @@
 import { chromium } from "playwright";
 
 const BASE = process.env.VERIFY_BASE_URL ?? "http://localhost:4173";
-const FIXTURES = ["invoice-min", "invoice-max", "dc-max"];
+const FIXTURES = ["invoice-min", "invoice-max", "invoice-interstate", "dc-max"];
 
 function countPdfPages(buf) {
   // Cheap, dependency-free page count: every page object in a PDF

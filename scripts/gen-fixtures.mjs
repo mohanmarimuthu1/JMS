@@ -52,7 +52,27 @@ function computeInvoiceTotals(lines, gstPct) {
   const gross = subtotal + sgst + cgst;
   const total = Math.round(gross);
   const roundOff = Math.round((total - gross) * 100) / 100;
-  return { lines: withAmount, subtotal, sgstPct: gstPct, sgst, cgstPct: gstPct, cgst, roundOff, total, amountInWords: wordsInr(total) };
+  return {
+    lines: withAmount, subtotal, sgstPct: gstPct, sgst, cgstPct: gstPct, cgst,
+    igstPct: 0, igst: 0, supplyType: "intra",
+    roundOff, total, amountInWords: wordsInr(total),
+  };
+}
+
+// Inter-state: IGST replaces SGST+CGST, never both — mirrors the
+// inv_tax_mode CHECK constraint in supabase/schema.sql.
+function computeInterstateTotals(lines, igstPct) {
+  const withAmount = lines.map((l) => ({ ...l, amount: Math.round(l.qty * l.rate * 100) / 100 }));
+  const subtotal = Math.round(withAmount.reduce((s, l) => s + l.amount, 0) * 100) / 100;
+  const igst = Math.round(subtotal * (igstPct / 100) * 100) / 100;
+  const gross = subtotal + igst;
+  const total = Math.round(gross);
+  const roundOff = Math.round((total - gross) * 100) / 100;
+  return {
+    lines: withAmount, subtotal, sgstPct: 0, sgst: 0, cgstPct: 0, cgst: 0,
+    igstPct, igst, supplyType: "inter",
+    roundOff, total, amountInWords: wordsInr(total),
+  };
 }
 
 const seller = {
@@ -112,6 +132,25 @@ if (invoiceMax.total < 1000000) {
   throw new Error(`invoice-max total too small to exercise a big number: ${invoiceMax.total}`);
 }
 
+// ---- invoice-interstate: IGST instead of SGST+CGST ----
+const interstateTotals = computeInterstateTotals(
+  [{ description: "Precision shaft, EN24 grade, ground finish", hsn: "8466", qty: 15, rate: 620 }],
+  18,
+);
+const invoiceInterstate = {
+  kind: "invoice",
+  docNo: 217,
+  date: "2026-09-15",
+  customer: { name: "Bangalore Precision Works", address: "Peenya Industrial Area, Bangalore - 560058", gstin: "29AAFCK1234L1ZP" },
+  seller,
+  orderNo: "PO-9981",
+  orderDate: "2026-09-10",
+  dcNoManual: null,
+  dcDateManual: null,
+  status: "issued",
+  ...interstateTotals,
+};
+
 // ---- dc-max: no money, purpose = Job work ----
 const dcMax = {
   kind: "dc",
@@ -134,6 +173,7 @@ mkdirSync("src/fixtures", { recursive: true });
 for (const [name, data] of [
   ["invoice-min", invoiceMin],
   ["invoice-max", invoiceMax],
+  ["invoice-interstate", invoiceInterstate],
   ["dc-max", dcMax],
 ]) {
   writeFileSync(`src/fixtures/${name}.json`, JSON.stringify(data, null, 2) + "\n");

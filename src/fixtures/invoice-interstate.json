@@ -1,0 +1,44 @@
+{
+  "kind": "invoice",
+  "docNo": 217,
+  "date": "2026-09-15",
+  "customer": {
+    "name": "Bangalore Precision Works",
+    "address": "Peenya Industrial Area, Bangalore - 560058",
+    "gstin": "29AAFCK1234L1ZP"
+  },
+  "seller": {
+    "name": "JMS ENGINEERING",
+    "addressLine": "1/2, 39-B-16, Aringar Anna Colony, SIDCO Industrial Estate, Coimbatore - 641 021.",
+    "cell": "8610026754, 7708881444",
+    "gstin": "33BBJPJ1166M1ZJ",
+    "stateCode": "33",
+    "gstSplitPct": 9,
+    "jurisdiction": "Coimbatore"
+  },
+  "orderNo": "PO-9981",
+  "orderDate": "2026-09-10",
+  "dcNoManual": null,
+  "dcDateManual": null,
+  "status": "issued",
+  "lines": [
+    {
+      "description": "Precision shaft, EN24 grade, ground finish",
+      "hsn": "8466",
+      "qty": 15,
+      "rate": 620,
+      "amount": 9300
+    }
+  ],
+  "subtotal": 9300,
+  "sgstPct": 0,
+  "sgst": 0,
+  "cgstPct": 0,
+  "cgst": 0,
+  "igstPct": 18,
+  "igst": 1674,
+  "supplyType": "inter",
+  "roundOff": 0,
+  "total": 10974,
+  "amountInWords": "Rupees Ten Thousand Nine Hundred Seventy Four Only"
+}

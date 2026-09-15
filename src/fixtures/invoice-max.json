@@ -154,6 +154,9 @@
   "sgst": 104761.42,
   "cgstPct": 9,
   "cgst": 104761.42,
+  "igstPct": 0,
+  "igst": 0,
+  "supplyType": "intra",
   "roundOff": 0.41,
   "total": 1373539,
   "amountInWords": "Rupees Thirteen Lakh Seventy Three Thousand Five Hundred Thirty Nine Only"

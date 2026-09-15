@@ -35,6 +35,9 @@
   "sgst": 40.5,
   "cgstPct": 9,
   "cgst": 40.5,
+  "igstPct": 0,
+  "igst": 0,
+  "supplyType": "intra",
   "roundOff": 0,
   "total": 531,
   "amountInWords": "Rupees Five Hundred Thirty One Only"

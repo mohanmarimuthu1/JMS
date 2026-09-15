@@ -6,6 +6,7 @@ import type { PrintableDocument } from "@/documents/types";
 
 import invoiceMin from "@/fixtures/invoice-min.json";
 import invoiceMax from "@/fixtures/invoice-max.json";
+import invoiceInterstate from "@/fixtures/invoice-interstate.json";
 import dcMax from "@/fixtures/dc-max.json";
 
 /**
@@ -17,6 +18,7 @@ import dcMax from "@/fixtures/dc-max.json";
 const FIXTURES: Record<string, PrintableDocument> = {
   "invoice-min": invoiceMin as PrintableDocument,
   "invoice-max": invoiceMax as PrintableDocument,
+  "invoice-interstate": invoiceInterstate as PrintableDocument,
   "dc-max": dcMax as PrintableDocument,
 };
 
