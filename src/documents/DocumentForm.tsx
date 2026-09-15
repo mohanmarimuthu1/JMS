@@ -20,6 +20,7 @@ interface DraftState {
   customerName: string;
   customerAddress: string;
   customerGstin: string;
+  interState: boolean;
   date: string;
   orderNo: string;
   orderDate: string;
@@ -39,6 +40,7 @@ function freshState(config: FormConfig): DraftState {
     customerName: "",
     customerAddress: "",
     customerGstin: "",
+    interState: false,
     date: new Date().toISOString().slice(0, 10),
     orderNo: "",
     orderDate: "",
@@ -119,7 +121,13 @@ export function DocumentForm({ config }: { config: FormConfig }) {
   }
 
   const gstinInvalid = state.customerGstin.trim() !== "" && !isValidGstin(state.customerGstin);
-  const outOfState = state.customerGstin.trim() !== "" && !gstinInvalid && isOutOfState(state.customerGstin);
+  // GSTIN-derived detection is automatic and can't be overridden downward
+  // (a real out-of-state GSTIN always means IGST). The `interState`
+  // checkbox exists only to *add* IGST for customers with no GSTIN at all,
+  // who would otherwise silently default to intra-state (see the note in
+  // create_invoice, supabase/functions.sql).
+  const gstinOutOfState = state.customerGstin.trim() !== "" && !gstinInvalid && isOutOfState(state.customerGstin);
+  const outOfState = gstinOutOfState || state.interState;
   const validLines = state.lines.filter((l) => l.description.trim() && parseFloat(l.qty) > 0);
   const canSubmit = state.customerName.trim() !== "" && validLines.length > 0 && !gstinInvalid;
 
@@ -139,6 +147,7 @@ export function DocumentForm({ config }: { config: FormConfig }) {
     if (config.kind === "invoice") {
       payload.order_no = state.orderNo;
       payload.order_date = state.orderDate;
+      payload.force_interstate = state.interState;
     } else {
       payload.ref_no = state.refNo;
       payload.purpose = state.purpose;
@@ -238,12 +247,29 @@ export function DocumentForm({ config }: { config: FormConfig }) {
             name="jms-customer-gstin"
           />
           {gstinInvalid && <p className="text-xs text-rust mt-1">Doesn't look like a valid 15-character GSTIN.</p>}
-          {outOfState && (
+          {gstinOutOfState && (
             <p className="text-xs text-muted mt-1">
               Out-of-state GSTIN — this bill will use IGST instead of SGST + CGST.
             </p>
           )}
         </div>
+
+        {config.kind === "invoice" && (
+          <div className="sm:col-span-2 flex items-center gap-2">
+            <input
+              id="interState"
+              type="checkbox"
+              checked={outOfState}
+              disabled={gstinOutOfState}
+              onChange={(e) => update("interState", e.target.checked)}
+              className="h-4 w-4 disabled:opacity-60"
+            />
+            <label htmlFor="interState" className="text-sm">
+              Other state order — apply IGST instead of SGST + CGST
+              {gstinOutOfState && " (already set by the GSTIN above)"}
+            </label>
+          </div>
+        )}
 
         <div>
           <label className="block text-sm mb-1">Date</label>

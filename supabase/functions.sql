@@ -126,6 +126,7 @@ declare
   v_words      text;
   v_pos        text;
   v_supply_type text;
+  v_force_inter boolean;
   v_date       date;
   v_dc_id      uuid;
 begin
@@ -164,8 +165,16 @@ begin
   -- for real below instead of deferred further. A customer with no
   -- GSTIN has no determinable registered state, so falls back to
   -- intra-state — see the note on v_pos's use in the IGST comment.
+  --
+  -- `force_interstate` is a manual operator override (the form's "Other
+  -- state order" checkbox) for exactly that no-GSTIN case: it can only
+  -- push supply_type to 'inter', never override a real GSTIN-derived
+  -- state back down to 'intra'. place_of_supply still falls back to the
+  -- seller's own state code when the customer has no GSTIN, since there
+  -- is no other source for it on this form.
   v_pos := coalesce(v_cust.state_code, v_settings.state_code);
-  v_supply_type := case when v_pos = v_settings.state_code then 'intra' else 'inter' end;
+  v_force_inter := coalesce((payload ->> 'force_interstate')::boolean, false);
+  v_supply_type := case when v_force_inter or v_pos <> v_settings.state_code then 'inter' else 'intra' end;
 
   v_dc_id := nullif(payload ->> 'dc_id', '')::uuid;
   if v_dc_id is not null then
