@@ -19,14 +19,26 @@ export function InvoiceTotals({ doc }: { doc: PrintableDocument }) {
           <span>Sub Total</span>
           <span>{money(doc.subtotal)}</span>
         </div>
-        <div className="flex justify-between px-2 py-1">
-          <span>SGST @{doc.sgstPct ?? 0}%</span>
-          <span>{money(doc.sgst)}</span>
-        </div>
-        <div className="flex justify-between px-2 py-1">
-          <span>CGST @{doc.cgstPct ?? 0}%</span>
-          <span>{money(doc.cgst)}</span>
-        </div>
+        {/* Inter-state supply: IGST replaces SGST+CGST, never both —
+            mirrors the inv_tax_mode CHECK constraint in
+            supabase/schema.sql, which makes storing both impossible. */}
+        {doc.supplyType === "inter" ? (
+          <div className="flex justify-between px-2 py-1">
+            <span>IGST @{doc.igstPct ?? 0}%</span>
+            <span>{money(doc.igst)}</span>
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-between px-2 py-1">
+              <span>SGST @{doc.sgstPct ?? 0}%</span>
+              <span>{money(doc.sgst)}</span>
+            </div>
+            <div className="flex justify-between px-2 py-1">
+              <span>CGST @{doc.cgstPct ?? 0}%</span>
+              <span>{money(doc.cgst)}</span>
+            </div>
+          </>
+        )}
         {doc.roundOff != null && doc.roundOff !== 0 && (
           <div className="flex justify-between px-2 py-1">
             <span>Round Off</span>

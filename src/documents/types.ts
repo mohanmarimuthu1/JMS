@@ -42,6 +42,11 @@ export interface PrintableDocument {
   sgst?: number;
   cgstPct?: number;
   cgst?: number;
+  /** Inter-state supply only — mutually exclusive with sgst/cgst (see
+   * the inv_tax_mode CHECK constraint in supabase/schema.sql). */
+  igstPct?: number;
+  igst?: number;
+  supplyType?: "intra" | "inter";
   roundOff?: number;
   total?: number;
   /** Stored, not computed client-side. See src/lib/money.ts. */
