@@ -55,9 +55,9 @@ create table customers (
   gstin       text check (
     gstin is null or gstin ~ '^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z][Z][0-9A-Z]$'
   ),
-  -- IGST hook (deferred feature, see docs/DECISIONS.md): the GSTIN's state
-  -- code, derived automatically so nothing has to remember to keep it in
-  -- sync. Unused by anything until IGST is built.
+  -- Drives IGST vs SGST+CGST in create_invoice (functions.sql) — the
+  -- GSTIN's state code, derived automatically so nothing has to
+  -- remember to keep it in sync. See docs/DECISIONS.md #9.
   state_code  text generated always as (substring(gstin from 1 for 2)) stored,
   is_active   boolean not null default true,
   created_at  timestamptz not null default now(),
@@ -159,8 +159,9 @@ create table invoices (
   -- appearance (including the GSTIN!) of every previously issued invoice.
   seller_snapshot   jsonb not null,
 
-  -- IGST hooks (deferred feature, see docs/DECISIONS.md #5). All defaulted
-  -- so adding IGST later is additive: no migration, no constraint rewrite.
+  -- IGST support (docs/DECISIONS.md #9) — added as nullable-by-default
+  -- hooks in Slice 2, before IGST itself was built, so activating it
+  -- later (which happened) needed no migration or constraint rewrite.
   place_of_supply   text not null default '33' check (place_of_supply ~ '^[0-9]{2}$'),
   supply_type       text not null default 'intra' check (supply_type in ('intra', 'inter')),
 
@@ -189,8 +190,10 @@ create table invoices (
   -- including by a future bug, a manual SQL fix, or a restored backup.
   constraint inv_total_arith check (total = subtotal + sgst + cgst + igst + round_off),
   constraint inv_total_whole check (total = round(total, 0)),
-  -- SGST+IGST on the same invoice — the classic implementation bug once
-  -- IGST is added — is unstorable before that feature even exists.
+  -- SGST/CGST and IGST on the same invoice — the classic implementation
+  -- bug for a system supporting both tax modes — is structurally
+  -- unstorable, enforced by the database rather than by create_invoice
+  -- remembering to get it right.
   constraint inv_tax_mode check (
     (supply_type = 'intra' and igst_pct = 0 and igst = 0)
     or

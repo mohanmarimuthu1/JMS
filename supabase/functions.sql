@@ -73,7 +73,9 @@ create or replace function find_or_create_customer(
   p_name text, p_address text, p_gstin text, p_id uuid default null
 ) returns customers
 language plpgsql security definer set search_path = public, pg_temp as $$
-declare v_cust customers;
+declare
+  v_cust customers;
+  v_name text;
 begin
   if p_id is not null then
     select * into v_cust from customers where id = p_id;
@@ -84,8 +86,13 @@ begin
     raise exception 'Customer name is required' using errcode = 'JMS05';
   end if;
 
+  -- Strips a leading salutation ("Mr Ganesan" -> "Ganesan"). Mirrors
+  -- src/lib/validation.ts's stripHonorificPrefix — enforced here too so
+  -- it's authoritative regardless of client version or entry path.
+  v_name := regexp_replace(btrim(p_name), '^(mr|mrs|ms|miss|shri|smt|dr)\.?\s+', '', 'i');
+
   insert into customers (name, address, gstin)
-  values (btrim(p_name), nullif(btrim(coalesce(p_address, '')), ''), p_gstin)
+  values (v_name, nullif(btrim(coalesce(p_address, '')), ''), p_gstin)
   on conflict (lower(btrim(name))) do update
     set address   = coalesce(nullif(btrim(coalesce(excluded.address, '')), ''), customers.address),
         gstin     = coalesce(excluded.gstin, customers.gstin),
@@ -106,18 +113,21 @@ declare
   v_no        int;
   v_id        uuid;
   v_cust_snap jsonb;
-  v_sgst_pct  numeric(5,2);
-  v_cgst_pct  numeric(5,2);
-  v_subtotal  numeric(12,2);
-  v_sgst      numeric(12,2);
-  v_cgst      numeric(12,2);
-  v_gross     numeric(14,4);
-  v_total     numeric(12,2);
-  v_round_off numeric(4,2);
-  v_words     text;
-  v_pos       text;
-  v_date      date;
-  v_dc_id     uuid;
+  v_sgst_pct   numeric(5,2);
+  v_cgst_pct   numeric(5,2);
+  v_igst_pct   numeric(5,2);
+  v_subtotal   numeric(12,2);
+  v_sgst       numeric(12,2);
+  v_cgst       numeric(12,2);
+  v_igst       numeric(12,2);
+  v_gross      numeric(14,4);
+  v_total      numeric(12,2);
+  v_round_off  numeric(4,2);
+  v_words      text;
+  v_pos        text;
+  v_supply_type text;
+  v_date       date;
+  v_dc_id      uuid;
 begin
   -- ===== ALL VALIDATION HAPPENS BEFORE THE INSERT =========================
   select * into v_settings from settings where settings.id = 1;
@@ -146,16 +156,16 @@ begin
     nullif(payload ->> 'customer_id', '')::uuid
   );
 
-  -- Hard block, not just a warning: an out-of-state customer needs IGST,
-  -- which doesn't exist yet (deferred on purpose, see docs/DECISIONS.md
-  -- #5). This fails loud, before any number is consumed, instead of
-  -- silently issuing a legally wrong SGST+CGST invoice.
+  -- Place of supply drives which tax applies — not a warning anymore.
+  -- Originally this hard-blocked out-of-state customers because IGST
+  -- wasn't built (docs/DECISIONS.md #5 called it a deferred feature on
+  -- the assumption inter-state orders were rare/nonexistent for this
+  -- shop). Confirmed with the shop that they do happen, so it's built
+  -- for real below instead of deferred further. A customer with no
+  -- GSTIN has no determinable registered state, so falls back to
+  -- intra-state — see the note on v_pos's use in the IGST comment.
   v_pos := coalesce(v_cust.state_code, v_settings.state_code);
-  if v_pos <> v_settings.state_code then
-    raise exception
-      'Customer GSTIN is registered in state %, not % (Tamil Nadu). This bill needs IGST, which is not supported yet. Do not issue it.',
-      v_pos, v_settings.state_code using errcode = 'JMS03';
-  end if;
+  v_supply_type := case when v_pos = v_settings.state_code then 'intra' else 'inter' end;
 
   v_dc_id := nullif(payload ->> 'dc_id', '')::uuid;
   if v_dc_id is not null then
@@ -170,16 +180,29 @@ begin
   end if;
 
   -- ===== MONEY: computed here, never trusted from the client ==============
-  v_sgst_pct := coalesce(nullif(btrim(coalesce(payload ->> 'sgst_pct', '')), '')::numeric, v_settings.gst_split);
-  v_cgst_pct := coalesce(nullif(btrim(coalesce(payload ->> 'cgst_pct', '')), '')::numeric, v_settings.gst_split);
-
   select coalesce(sum(round((l ->> 'qty')::numeric * coalesce(nullif(btrim(l ->> 'rate'), '')::numeric, 0), 2)), 0)
     into v_subtotal
   from jsonb_array_elements(v_lines) l;
 
-  v_sgst      := round(v_subtotal * v_sgst_pct / 100, 2);
-  v_cgst      := round(v_subtotal * v_cgst_pct / 100, 2);
-  v_gross     := v_subtotal + v_sgst + v_cgst;
+  if v_supply_type = 'inter' then
+    -- IGST replaces SGST+CGST, not on top of it — same total tax rate
+    -- (SGST% + CGST% = IGST%), just collected under one head instead of
+    -- two, per standard GST practice for inter-state supply. The
+    -- inv_tax_mode CHECK constraint in schema.sql makes it structurally
+    -- impossible to store both SGST/CGST and IGST on the same invoice.
+    v_sgst_pct := 0; v_sgst := 0;
+    v_cgst_pct := 0; v_cgst := 0;
+    v_igst_pct := coalesce(nullif(btrim(coalesce(payload ->> 'igst_pct', '')), '')::numeric, v_settings.gst_split * 2);
+    v_igst     := round(v_subtotal * v_igst_pct / 100, 2);
+  else
+    v_sgst_pct := coalesce(nullif(btrim(coalesce(payload ->> 'sgst_pct', '')), '')::numeric, v_settings.gst_split);
+    v_cgst_pct := coalesce(nullif(btrim(coalesce(payload ->> 'cgst_pct', '')), '')::numeric, v_settings.gst_split);
+    v_sgst     := round(v_subtotal * v_sgst_pct / 100, 2);
+    v_cgst     := round(v_subtotal * v_cgst_pct / 100, 2);
+    v_igst_pct := 0; v_igst := 0;
+  end if;
+
+  v_gross     := v_subtotal + v_sgst + v_cgst + v_igst;
   v_total     := round(v_gross, 0);
   v_round_off := v_total - v_gross;
   v_words     := num_to_words_inr(v_total);
@@ -191,7 +214,7 @@ begin
     date, order_no, order_date, dc_id,
     customer_id, customer_snapshot, seller_snapshot,
     place_of_supply, supply_type,
-    subtotal, sgst_pct, sgst, cgst_pct, cgst, round_off, total, amount_in_words,
+    subtotal, sgst_pct, sgst, cgst_pct, cgst, igst_pct, igst, round_off, total, amount_in_words,
     created_by
   ) values (
     v_date,
@@ -202,8 +225,8 @@ begin
     jsonb_build_object('name', v_settings.name, 'address_line', v_settings.address_line,
                         'cell', v_settings.cell, 'gstin', v_settings.gstin,
                         'jurisdiction', v_settings.jurisdiction, 'logo_url', v_settings.logo_url),
-    v_pos, 'intra',
-    v_subtotal, v_sgst_pct, v_sgst, v_cgst_pct, v_cgst, v_round_off, v_total, v_words,
+    v_pos, v_supply_type,
+    v_subtotal, v_sgst_pct, v_sgst, v_cgst_pct, v_cgst, v_igst_pct, v_igst, v_round_off, v_total, v_words,
     auth.uid()
   )
   returning invoices.invoice_no, invoices.id into v_no, v_id;
