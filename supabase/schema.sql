@@ -251,13 +251,19 @@ create trigger t_items_touch     before update on items     for each row execute
 -- anywhere despite its print router depending on one; this supplies it for
 -- free and flattens customer_snapshot->>'name' so nothing has to
 -- dereference a possibly-null nested object client-side.
+-- customer_id is appended at the end (not inserted alongside the other
+-- columns) because `create or replace view` cannot reorder or insert
+-- columns into an existing view's column list, only append — so the
+-- per-company bill history (History -> Companies) can filter reliably
+-- by customer_id even across a customer's own name edits, rather than
+-- matching on text.
 create or replace view documents with (security_invoker = true) as
 select 'invoice'::text as kind, i.invoice_no as doc_no, i.id, i.date, i.status,
-       i.customer_snapshot ->> 'name' as customer_name, i.total, i.created_at
+       i.customer_snapshot ->> 'name' as customer_name, i.total, i.created_at, i.customer_id
 from invoices i
 union all
 select 'dc'::text, d.dc_no, d.id, d.date, d.status,
-       d.customer_snapshot ->> 'name', null::numeric, d.created_at
+       d.customer_snapshot ->> 'name', null::numeric, d.created_at, d.customer_id
 from delivery_challans d;
 
 -- The audit artifact: every invoice_no in range is provably ISSUED,

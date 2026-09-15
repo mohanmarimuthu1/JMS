@@ -6,6 +6,7 @@ export interface DocumentRow {
   id: string;
   date: string;
   status: "issued" | "cancelled";
+  customer_id: string | null;
   customer_name: string | null;
   total: number | null;
   created_at: string;
@@ -14,6 +15,8 @@ export interface DocumentRow {
 export interface HistoryFilter {
   query: string;
   type: "all" | "invoice" | "dc";
+  /** Scopes results to one customer's bill folder (CustomerBillsPage). */
+  customerId?: string;
 }
 
 /**
@@ -31,6 +34,7 @@ export async function fetchHistory(filter: HistoryFilter): Promise<DocumentRow[]
     .limit(100);
 
   if (filter.type !== "all") q = q.eq("kind", filter.type);
+  if (filter.customerId) q = q.eq("customer_id", filter.customerId);
   if (filter.query.trim()) {
     const term = filter.query.trim();
     const asNumber = Number(term);

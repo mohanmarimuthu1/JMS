@@ -30,3 +30,12 @@ export function formatDateDDMMYYYY(iso: string | null | undefined): string {
   if (!y || !m || !d || y.length !== 4) return iso;
   return `${d}-${m}-${y}`;
 }
+
+/** For `created_at` timestamps only (a real timestamptz, unlike the
+ * bare `date` column formatted above) — local time, "HH:MM". */
+export function formatTimeHHMM(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FileText, Truck, Search, LogOut } from "lucide-react";
+import { FileText, Truck, Search, Building2, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/AuthProvider";
 
 /**
@@ -18,7 +18,7 @@ export function HomePage() {
         </button>
       </header>
 
-      <div className="p-4 max-w-3xl mx-auto grid sm:grid-cols-3 gap-4">
+      <div className="p-4 max-w-3xl mx-auto grid sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Link
           to="/new/invoice"
           className="bg-white border border-rule rounded-sm p-6 flex flex-col items-center gap-2 hover:border-rust min-h-[120px] justify-center"
@@ -40,10 +40,17 @@ export function HomePage() {
           <Search size={28} />
           <span className="font-semibold">History</span>
         </Link>
+        <Link
+          to="/customers"
+          className="bg-white border border-rule rounded-sm p-6 flex flex-col items-center gap-2 hover:border-rust min-h-[120px] justify-center"
+        >
+          <Building2 size={28} />
+          <span className="font-semibold">Companies</span>
+        </Link>
       </div>
 
       <div className="p-4 max-w-3xl mx-auto text-xs text-muted">
-        Customer/item lists and settings editors land in a later slice — see PROCESS.md.
+        Item lists and business-settings editors land in a later slice — see PROCESS.md.
       </div>
     </div>
   );
