@@ -174,7 +174,7 @@ export function DocumentForm({ config }: { config: FormConfig }) {
       {/* Customer */}
       <div className="bg-white border border-rule rounded-sm p-4 grid sm:grid-cols-2 gap-4">
         <div className="relative sm:col-span-2">
-          <label className="block text-sm mb-1">Customer name</label>
+          <label className="block text-sm mb-1">Company name</label>
           <div className="relative">
             <input
               value={customerQuery}
