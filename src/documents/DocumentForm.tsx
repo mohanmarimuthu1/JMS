@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Plus, Trash2, Search } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { saveDraft, loadDraft, clearDraft } from "@/lib/draft";
-import { isValidGstin, isOutOfState } from "@/lib/validation";
+import { isValidGstin, isOutOfState, stripHonorificPrefix } from "@/lib/validation";
 import { useCustomerAutocomplete, useItemAutocomplete, type ItemRow } from "@/hooks/useAutocomplete";
 import type { FormConfig } from "./formConfigs";
 
@@ -179,15 +179,23 @@ export function DocumentForm({ config }: { config: FormConfig }) {
             <input
               value={customerQuery}
               onChange={(e) => {
-                setCustomerQuery(e.target.value);
+                // Honorifics stripped as you type ("Mr Ganesan" ->
+                // "Ganesan") — a business tax invoice shouldn't carry a
+                // salutation, whether it was typed out of habit or
+                // inserted by the browser's own autofill (see the
+                // autoComplete="off" note below).
+                const value = stripHonorificPrefix(e.target.value);
+                setCustomerQuery(value);
                 update("customerId", null);
-                update("customerName", e.target.value);
+                update("customerName", value);
                 setShowCustomerList(true);
               }}
               onFocus={() => setShowCustomerList(true)}
               onBlur={() => setTimeout(() => setShowCustomerList(false), 150)}
               className="w-full border border-rule rounded-sm px-3 py-2 min-h-[44px]"
               placeholder="Type to search or add new"
+              autoComplete="off"
+              name="jms-customer-name"
             />
             <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted" />
           </div>
@@ -212,6 +220,8 @@ export function DocumentForm({ config }: { config: FormConfig }) {
             value={state.customerAddress}
             onChange={(e) => update("customerAddress", e.target.value)}
             className="w-full border border-rule rounded-sm px-3 py-2 min-h-[44px]"
+            autoComplete="off"
+            name="jms-customer-address"
           />
         </div>
         <div>
@@ -220,11 +230,13 @@ export function DocumentForm({ config }: { config: FormConfig }) {
             value={state.customerGstin}
             onChange={(e) => update("customerGstin", e.target.value.toUpperCase())}
             className="w-full border border-rule rounded-sm px-3 py-2 min-h-[44px] uppercase"
+            autoComplete="off"
+            name="jms-customer-gstin"
           />
           {gstinInvalid && <p className="text-xs text-rust mt-1">Doesn't look like a valid 15-character GSTIN.</p>}
           {outOfState && (
-            <p className="text-xs text-rust mt-1">
-              This GSTIN isn't Tamil Nadu (33) — out-of-state bills need IGST, which isn't supported yet. Saving will be blocked.
+            <p className="text-xs text-muted mt-1">
+              Out-of-state GSTIN — this bill will use IGST instead of SGST + CGST.
             </p>
           )}
         </div>
@@ -447,6 +459,8 @@ function DescriptionCell({
         onBlur={() => setTimeout(() => setShowList(false), 150)}
         placeholder="Description"
         className="w-full border border-rule rounded-sm px-2 py-1.5 min-h-[40px]"
+        autoComplete="off"
+        name="jms-line-description"
       />
       {showList && results.length > 0 && (
         <ul className="absolute z-10 w-full bg-white border border-rule rounded-sm mt-1 max-h-40 overflow-auto shadow-sm text-sm">

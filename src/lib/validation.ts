@@ -15,7 +15,22 @@ export function gstinStateCode(value: string): string | null {
 
 export const TAMIL_NADU_STATE_CODE = "33";
 
+/** Now informational only — an out-of-state GSTIN triggers IGST
+ * instead of SGST+CGST (see create_invoice in supabase/functions.sql),
+ * it no longer blocks the bill. See docs/DECISIONS.md. */
 export function isOutOfState(gstin: string): boolean {
   const code = gstinStateCode(gstin);
   return !!code && code !== TAMIL_NADU_STATE_CODE;
+}
+
+// Strips a leading salutation from a typed or browser-autofilled
+// customer name ("Mr Ganesan" -> "Ganesan"). Applied client-side as
+// the operator types, and again server-side in find_or_create_customer
+// (supabase/functions.sql) so it's enforced regardless of entry path —
+// same "the database can't produce a wrong bill" principle used
+// throughout this project.
+const HONORIFIC_RE = /^(mr|mrs|ms|miss|shri|smt|dr)\.?\s+/i;
+
+export function stripHonorificPrefix(name: string): string {
+  return name.replace(HONORIFIC_RE, "");
 }
