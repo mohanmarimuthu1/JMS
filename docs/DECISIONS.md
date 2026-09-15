@@ -98,7 +98,7 @@ Built once instead: `src/documents/PrintShell.tsx` +
 | Void model | Cancel, never hard-delete — both invoices *and* DCs | `invoice_no`/`dc_no` are unique; a hard-deleted number can never be reissued and leaves an unexplained gap in a legal series. Extending this to DCs (not a tax document) is an economic choice, not a legal one: one cancel mechanism is less code than two, and an invoice can reference a DC, so deleting a DC would orphan that link. |
 | Offline behavior | Never lose typed work | `localStorage` draft autosave + restore + retry (Slice 3), not a full offline sync queue (see Cuts, below) |
 | Paper stock | Blank A4 | The prototype's full header band (logo, name, address) prints on every page; no letterhead-suppression mode needed |
-| IGST / place of supply | Deferred | Nullable schema hooks now so it's additive later with no migration, plus a hard save-time block on out-of-state customer GSTINs so the gap fails loud, not silent |
+| IGST / place of supply | Built (revised — see §9) | Originally deferred with a hard save-time block on out-of-state GSTINs, on the assumption inter-state orders were rare/nonexistent. The shop confirmed they do happen, so it was built for real instead — the nullable schema hooks added at the time turned out to need no migration to activate |
 | Backups | Verify Supabase's scheduled backups are on, add a one-click CSV export | Slice 5 |
 | Unit column (Nos/Kgs/Hrs) | No unit column on the physical paper bill | Field dropped entirely rather than carried as dead weight (the prototype had `items.unit` with no UI input and no column on either line table — it could never reach a printed line) |
 
@@ -146,6 +146,47 @@ print time — so editing settings retroactively changes the appearance
 of every previously issued invoice, including its GSTIN. Fixed by
 snapshotting seller details onto the row at creation time (Slice 2),
 symmetric with how the customer is already frozen.
+
+### 9. IGST, revisited — a deferral reversed on real information
+
+§5 deferred IGST on the stated assumption that this is "a local
+Coimbatore job-work shop" unlikely to bill out-of-state customers, and
+built a hard block instead: `create_invoice` raised an exception for
+any customer whose GSTIN didn't start with `33`, refusing to issue the
+bill at all. That assumption turned out to be wrong — the shop's
+owners confirmed inter-state orders do happen — so building IGST
+properly is not optional polish, it's fixing a bill the app was
+previously refusing to let the business write.
+
+**What changed, concretely** (`supabase/functions.sql`,
+`create_invoice`): place of supply is still derived the same way (the
+customer's GSTIN state-code prefix, falling back to the seller's home
+state when there's no GSTIN to read), but instead of raising, it now
+sets `supply_type` to `'intra'` or `'inter'` and computes tax
+accordingly — SGST+CGST for intra-state as before, or IGST for
+inter-state, **never both**, enforced by the `inv_tax_mode` CHECK
+constraint that already existed in `schema.sql` from Slice 2 (built
+then specifically so this reversal wouldn't need a migration). The
+IGST rate is derived as double the configured SGST rate
+(`settings.gst_split * 2`) — standard GST practice, since the combined
+SGST+CGST rate and the IGST rate for the same goods/services are the
+same number, just collected under one head instead of two.
+
+**What this validates about the original design:** the schema hooks
+(`place_of_supply`, `supply_type`, `igst_pct`, `igst` columns, and the
+`inv_tax_mode` constraint) were added in Slice 2 *specifically* so
+enabling IGST later would be additive — no new columns, no data
+migration, no rewritten constraint. That bet paid off: this reversal
+touched one SQL function and a handful of print/form lines, not the
+schema.
+
+**What's still a known simplification, not a bug:** a customer with no
+GSTIN on file has no determinable registered state from the data this
+app captures (no separate "state" field on the address), so they're
+treated as intra-state by default. Full place-of-supply-by-delivery-
+address for unregistered consumers is a materially bigger feature and
+hasn't been asked for — noted here so it's a decision, not a gap
+discovered later.
 
 ---
 

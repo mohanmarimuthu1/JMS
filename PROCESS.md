@@ -93,6 +93,25 @@ screenshots at each step, not just a passing build:
 - Real PWA icons from the shop's actual logo (not a placeholder).
 - The one-page operator instructions your father actually needs.
 
+### IGST, built for real ✅ verified live (2026-09-15)
+You told me your parents confirmed inter-state orders do happen —
+that reverses the earlier "defer IGST" call, since the app was
+previously *refusing to issue* an out-of-state bill rather than
+getting the tax wrong. Now: IGST is computed automatically for an
+out-of-state customer GSTIN instead of SGST+CGST, verified live
+through both the RPC and the actual browser form, and the printed
+invoice correctly shows "IGST @18%". No schema change was needed —
+the Slice 2 schema had already left the hooks for exactly this.
+Full detail in `docs/DECISIONS.md` §9 and `docs/PROGRESS.md`.
+
+### Autofill / "Mr" in customer names — fixed ✅ verified live
+The customer name field had no `autoComplete="off"`, leaving the
+browser's own autofill free to insert saved values (like "Mr"/"Mrs")
+into it. Fixed by disabling browser autofill on the form's
+autocomplete-driven fields and stripping a leading salutation both as
+you type and again on the server — verified live in the actual form
+and via a direct database check.
+
 ---
 
 ## What's left, and how to do it
@@ -148,7 +167,6 @@ because they're not needed yet.
 |---|---|---|
 | Slice 6: customer/item/settings editors | Dedicated list/edit screens for customers, items, and the business profile | The form already learns customers and items automatically when you bill them — build a real editor only once a typo or duplicate actually needs fixing by hand, not before |
 | Invoice-to-DC picker | Letting the invoice form select an *existing* delivery challan to bill against, instead of leaving it unlinked | `dc_id` already exists end-to-end in the schema and the `create_invoice` RPC — only the picker UI is missing. Build it when you're actually issuing invoices against DCs day to day |
-| IGST / out-of-state billing | Full inter-state tax support | Only if you actually get an out-of-state customer — right now the app hard-blocks that case with a clear error rather than silently issuing a wrong bill, which was the deliberate design choice (`docs/DECISIONS.md`) |
 
 ### Minor, non-urgent technical note
 

@@ -153,9 +153,6 @@ the customer/item/settings editors (Slice 6, deliberately deferred —
 the form already learns both on save).
 
 ## Slice 5 — History, cancel, hand-off
-**Status: not started.** Depends on Slices 3–4.
-
-## Slice 5 — History, cancel, hand-off
 **Status: done and verified live.**
 
 - `src/pages/HistoryPage.tsx` queries the `documents` view server-side
@@ -203,6 +200,63 @@ backups are actually turned on (dashboard-only setting, documented in
 (same note as Slice 3/4) — `dc_id` is wired through the schema and
 RPC, but there is no UI yet to select an existing DC when billing
 against it.
+
+## Post-Slice-5 update (2026-09-15) — IGST built for real; autofill/name bug fixed
+
+Two changes prompted by the user, verified live against the real
+project.
+
+**IGST, no longer deferred.** The shop confirmed inter-state orders do
+happen, reversing the assumption behind the Slice 2/3 hard block (see
+`docs/DECISIONS.md` §9 for the full reasoning). `create_invoice` now
+computes IGST for an out-of-state customer instead of refusing to
+issue the bill:
+- `supply_type`/`place_of_supply` are set from the customer's GSTIN
+  state code (unchanged detection logic); tax computation branches on
+  it instead of raising an exception.
+- IGST rate = `settings.gst_split * 2` (standard practice — the
+  combined SGST+CGST rate and the IGST rate are the same number).
+- The existing `inv_tax_mode` CHECK constraint (built in Slice 2,
+  specifically so this reversal wouldn't need a migration) already
+  guarantees SGST/CGST and IGST can never both be non-zero on the same
+  row — no schema change was needed, only the function.
+- `InvoiceTotals.tsx` renders "IGST @X%" in place of the SGST/CGST rows
+  when `supplyType === "inter"`.
+- The form's out-of-state warning changed from "Saving will be
+  blocked" to an informational note; the Save button is no longer
+  disabled for an out-of-state GSTIN.
+- New permanent fixture `invoice-interstate` added to the print
+  regression harness (`scripts/gen-fixtures.mjs`,
+  `scripts/verify-print.mjs`) so this render path is checked
+  automatically going forward.
+- **Verified live**: created a real inter-state invoice via direct RPC
+  call and confirmed `supply_type='inter'`, `sgst=cgst=0`,
+  `igst_pct=18`, correct total and words; then repeated the same
+  through the actual browser form (not just the API) and confirmed the
+  Save button stays enabled and the printed invoice renders "IGST
+  @18%" correctly.
+- Known simplification, not a bug: a customer with no GSTIN on file
+  has no determinable state from the data this app captures, so
+  defaults to intra-state.
+
+**Autofill / honorific-prefix bug.** The customer name, address, GSTIN,
+and item description inputs had no `autoComplete` attribute, leaving
+the browser's own per-field autofill free to interfere with — and
+occasionally insert saved values like "Mr"/"Mrs" into — the customer
+name field. Fixed:
+- `autoComplete="off"` plus a unique `name` attribute added to those
+  inputs, so the browser's own suggestion dropdown can't compete with
+  the app's custom autocomplete.
+- `stripHonorificPrefix()` (`src/lib/validation.ts`) strips a leading
+  "Mr/Mrs/Ms/Miss/Shri/Smt/Dr" (with or without a trailing period)
+  from the customer name — applied live as the operator types, **and**
+  again server-side in `find_or_create_customer` (defense in depth,
+  same principle used throughout this project: the database enforces
+  it regardless of client version or entry path).
+- **Verified live**: typed "Mr Test Honorific" into the actual form
+  and confirmed the input showed "Test Honorific" before Save was even
+  clicked; separately confirmed via direct RPC call that a name typed
+  as "Mr Bangalore Traders" is stored as "Bangalore Traders".
 
 ## Slice 6 — Master-data + settings editors (optional)
 **Status: not started.** Deliberately deferred — see
