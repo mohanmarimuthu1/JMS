@@ -23,3 +23,6 @@ yarn-error.log*
 
 # TypeScript build cache
 *.tsbuildinfo
+
+# graphify knowledge-graph artifacts (regenerable — run /graphify to rebuild)
+graphify-out/
