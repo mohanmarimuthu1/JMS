@@ -205,6 +205,10 @@ export function DocumentForm({ config }: { config: FormConfig }) {
                 <li
                   key={c.id}
                   className="px-3 py-2 hover:bg-paper cursor-pointer text-sm"
+                  // Blocks the input's blur (which the onBlur above would
+                  // otherwise race against this click and hide the list
+                  // before it registers) instead of letting focus leave first.
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => pickCustomer(c)}
                 >
                   <div className="font-medium">{c.name}</div>
@@ -467,7 +471,12 @@ function DescriptionCell({
           {results
             .filter((it) => it.description.toLowerCase() !== line.description.trim().toLowerCase())
             .map((it) => (
-              <li key={it.id} className="px-2 py-1.5 hover:bg-paper cursor-pointer" onClick={() => onPickItem(line.key, it)}>
+              <li
+                key={it.id}
+                className="px-2 py-1.5 hover:bg-paper cursor-pointer"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onPickItem(line.key, it)}
+              >
                 {it.description}
               </li>
             ))}
